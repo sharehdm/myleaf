@@ -49,14 +49,16 @@ func (p *Processor) SetRouter(msgtype uint16, msgRouter *chanrpc.Server) {
 }
 
 // goroutine safe
-func (p *Processor) Route(msg MsgRaw, userData interface{}) error {
-	// raw
-	i, ok := p.msgInfo[msg.msgType]
-	if !ok {
-		return fmt.Errorf("message %v not registered", msg.msgType)
-	}
-	if i.msgRouter != nil {
-		i.msgRouter.Go(msg.msgType, msg.msgRawData, userData)
+func (p *Processor) Route(msg interface{}, userData interface{}) error {
+	if msgRaw, ok := msg.(MsgRaw); ok {
+		i, ok := p.msgInfo[msgRaw.msgType]
+		if !ok {
+			return fmt.Errorf("message %v not registered", msgRaw.msgType)
+		}
+		if i.msgRouter != nil {
+			i.msgRouter.Go(msgRaw.msgType, msgRaw.msgRawData, userData)
+		}
+		return nil
 	}
 	return nil
 }
