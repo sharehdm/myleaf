@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"runtime/pprof"
+	"strconv"
 	"time"
 
 	"github.com/sharehdm/myleaf/chanrpc"
@@ -20,7 +21,7 @@ var commands = []Command{
 
 type Command interface {
 	// must goroutine safe
-	name() string
+	key() int
 	// must goroutine safe
 	help() string
 	// must goroutine safe
@@ -28,13 +29,13 @@ type Command interface {
 }
 
 type ExternalCommand struct {
-	_name  string
+	_key   int
 	_help  string
 	server *chanrpc.Server
 }
 
-func (c *ExternalCommand) name() string {
-	return c._name
+func (c *ExternalCommand) key() int {
+	return c._key
 }
 
 func (c *ExternalCommand) help() string {
@@ -47,7 +48,7 @@ func (c *ExternalCommand) run(_args []string) string {
 		args[i] = v
 	}
 
-	ret, err := c.server.Call1(c._name, args...)
+	ret, err := c.server.Call1(c._key, args...)
 	if err != nil {
 		return err.Error()
 	}
@@ -61,17 +62,17 @@ func (c *ExternalCommand) run(_args []string) string {
 
 // you must call the function before calling console.Init
 // goroutine not safe
-func Register(name string, help string, f interface{}, server *chanrpc.Server) {
+func Register(key int, help string, f interface{}, server *chanrpc.Server) {
 	for _, c := range commands {
-		if c.name() == name {
-			log.Fatal("command %v is already registered", name)
+		if c.key() == key {
+			log.Fatal("command %v is already registered", key)
 		}
 	}
 
-	server.Register(name, f)
+	server.Register(key, f)
 
 	c := new(ExternalCommand)
-	c._name = name
+	c._key = key
 	c._help = help
 	c.server = server
 	commands = append(commands, c)
@@ -80,8 +81,8 @@ func Register(name string, help string, f interface{}, server *chanrpc.Server) {
 // help
 type CommandHelp struct{}
 
-func (c *CommandHelp) name() string {
-	return "help"
+func (c *CommandHelp) key() int {
+	return -1
 }
 
 func (c *CommandHelp) help() string {
@@ -91,7 +92,7 @@ func (c *CommandHelp) help() string {
 func (c *CommandHelp) run([]string) string {
 	output := "Commands:\r\n"
 	for _, c := range commands {
-		output += c.name() + " - " + c.help() + "\r\n"
+		output += strconv.Itoa(c.key()) + " - " + c.help() + "\r\n"
 	}
 	output += "quit - exit console"
 
@@ -101,8 +102,8 @@ func (c *CommandHelp) run([]string) string {
 // cpuprof
 type CommandCPUProf struct{}
 
-func (c *CommandCPUProf) name() string {
-	return "cpuprof"
+func (c *CommandCPUProf) key() int {
+	return -2
 }
 
 func (c *CommandCPUProf) help() string {
@@ -158,8 +159,8 @@ func profileName() string {
 // prof
 type CommandProf struct{}
 
-func (c *CommandProf) name() string {
-	return "prof"
+func (c *CommandProf) key() int {
+	return -3
 }
 
 func (c *CommandProf) help() string {

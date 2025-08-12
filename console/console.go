@@ -65,7 +65,8 @@ func (a *Agent) Run() {
 		}
 		var c Command
 		for _, _c := range commands {
-			if _c.name() == args[0] {
+			_key, _ := strconv.Atoi(args[0])
+			if _c.key() == _key {
 				c = _c
 				break
 			}

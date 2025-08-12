@@ -10,29 +10,29 @@ import (
 )
 
 type Processor struct {
-	msgInfo map[uint16]*MsgInfo
+	msgInfo map[int]*MsgInfo
 }
 
 type MsgInfo struct {
-	msgType   uint16
+	msgType   int
 	msgRouter *chanrpc.Server
 }
 
 type MsgHandler func([]interface{})
 
 type MsgRaw struct {
-	msgType    uint16
+	msgType    int
 	msgRawData []byte
 }
 
 func NewProcessor() *Processor {
 	p := new(Processor)
-	p.msgInfo = make(map[uint16]*MsgInfo)
+	p.msgInfo = make(map[int]*MsgInfo)
 	return p
 }
 
 // It's dangerous to call the method on routing or marshaling (unmarshaling)
-func (p *Processor) Register(msgtype uint16) uint16 {
+func (p *Processor) Register(msgtype int) int {
 	i := new(MsgInfo)
 	i.msgType = msgtype
 	p.msgInfo[msgtype] = i
@@ -40,7 +40,7 @@ func (p *Processor) Register(msgtype uint16) uint16 {
 }
 
 // It's dangerous to call the method on routing or marshaling (unmarshaling)
-func (p *Processor) SetRouter(msgtype uint16, msgRouter *chanrpc.Server) {
+func (p *Processor) SetRouter(msgtype int, msgRouter *chanrpc.Server) {
 	i, ok := p.msgInfo[msgtype]
 	if !ok {
 		log.Fatal("message %v not registered", msgtype)
@@ -65,7 +65,7 @@ func (p *Processor) Route(msg interface{}, userData interface{}) error {
 
 // goroutine safe
 func (p *Processor) Unmarshal(data []byte) (interface{}, error) {
-	msgtype := binary.LittleEndian.Uint16(data)
+	msgtype := (int)(binary.LittleEndian.Uint16(data))
 	_, ok := p.msgInfo[msgtype]
 	if !ok {
 		return nil, fmt.Errorf("message %v not registered", msgtype)

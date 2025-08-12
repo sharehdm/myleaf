@@ -12,13 +12,7 @@ import (
 // one server per goroutine (goroutine not safe)
 // one client per goroutine (goroutine not safe)
 type Server struct {
-	// id -> function
-	//
-	// function:
-	// func(args []interface{})
-	// func(args []interface{}) interface{}
-	// func(args []interface{}) []interface{}
-	functions map[interface{}]interface{}
+	functions map[int]interface{}
 	ChanCall  chan *CallInfo
 }
 
@@ -51,7 +45,7 @@ type Client struct {
 
 func NewServer(l int) *Server {
 	s := new(Server)
-	s.functions = make(map[interface{}]interface{})
+	s.functions = make(map[int]interface{})
 	s.ChanCall = make(chan *CallInfo, l)
 	return s
 }
@@ -65,7 +59,7 @@ func assert(i interface{}) []interface{} {
 }
 
 // you must call the function before calling Open and Go
-func (s *Server) Register(id interface{}, f interface{}) {
+func (s *Server) Register(id int, f interface{}) {
 	switch f.(type) {
 	case func([]interface{}):
 	case func([]interface{}) interface{}:
@@ -136,7 +130,7 @@ func (s *Server) Exec(ci *CallInfo) {
 }
 
 // goroutine safe
-func (s *Server) Go(id interface{}, args ...interface{}) {
+func (s *Server) Go(id int, args ...interface{}) {
 	f := s.functions[id]
 	if f == nil {
 		return
@@ -153,17 +147,17 @@ func (s *Server) Go(id interface{}, args ...interface{}) {
 }
 
 // goroutine safe
-func (s *Server) Call0(id interface{}, args ...interface{}) error {
+func (s *Server) Call0(id int, args ...interface{}) error {
 	return s.Open(0).Call0(id, args...)
 }
 
 // goroutine safe
-func (s *Server) Call1(id interface{}, args ...interface{}) (interface{}, error) {
+func (s *Server) Call1(id int, args ...interface{}) (interface{}, error) {
 	return s.Open(0).Call1(id, args...)
 }
 
 // goroutine safe
-func (s *Server) CallN(id interface{}, args ...interface{}) ([]interface{}, error) {
+func (s *Server) CallN(id int, args ...interface{}) ([]interface{}, error) {
 	return s.Open(0).CallN(id, args...)
 }
 
@@ -214,7 +208,7 @@ func (c *Client) call(ci *CallInfo, block bool) (err error) {
 	return
 }
 
-func (c *Client) f(id interface{}, n int) (f interface{}, err error) {
+func (c *Client) f(id int, n int) (f interface{}, err error) {
 	if c.s == nil {
 		err = errors.New("server not attached")
 		return
@@ -244,7 +238,7 @@ func (c *Client) f(id interface{}, n int) (f interface{}, err error) {
 	return
 }
 
-func (c *Client) Call0(id interface{}, args ...interface{}) error {
+func (c *Client) Call0(id int, args ...interface{}) error {
 	f, err := c.f(id, 0)
 	if err != nil {
 		return err
@@ -263,7 +257,7 @@ func (c *Client) Call0(id interface{}, args ...interface{}) error {
 	return ri.err
 }
 
-func (c *Client) Call1(id interface{}, args ...interface{}) (interface{}, error) {
+func (c *Client) Call1(id int, args ...interface{}) (interface{}, error) {
 	f, err := c.f(id, 1)
 	if err != nil {
 		return nil, err
@@ -282,7 +276,7 @@ func (c *Client) Call1(id interface{}, args ...interface{}) (interface{}, error)
 	return ri.ret, ri.err
 }
 
-func (c *Client) CallN(id interface{}, args ...interface{}) ([]interface{}, error) {
+func (c *Client) CallN(id int, args ...interface{}) ([]interface{}, error) {
 	f, err := c.f(id, 2)
 	if err != nil {
 		return nil, err
@@ -301,7 +295,7 @@ func (c *Client) CallN(id interface{}, args ...interface{}) ([]interface{}, erro
 	return assert(ri.ret), ri.err
 }
 
-func (c *Client) asynCall(id interface{}, args []interface{}, cb interface{}, n int) {
+func (c *Client) asynCall(id int, args []interface{}, cb interface{}, n int) {
 	f, err := c.f(id, n)
 	if err != nil {
 		c.ChanAsynRet <- &RetInfo{err: err, cb: cb}
@@ -320,7 +314,7 @@ func (c *Client) asynCall(id interface{}, args []interface{}, cb interface{}, n 
 	}
 }
 
-func (c *Client) AsynCall(id interface{}, _args ...interface{}) {
+func (c *Client) AsynCall(id int, _args ...interface{}) {
 	if len(_args) < 1 {
 		panic("callback function not found")
 	}
