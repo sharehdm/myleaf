@@ -22,7 +22,7 @@ func NewMsgParser() *MsgParser {
 	p.lenMsgLen = 2
 	p.minMsgLen = 1
 	p.maxMsgLen = 4096
-	p.littleEndian = false
+	p.littleEndian = true
 
 	return p
 }
