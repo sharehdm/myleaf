@@ -78,9 +78,12 @@ func (p *Processor) Marshal(pid uint16, mid uint16, msg interface{}) ([][]byte, 
 	topbys := make([]byte, 4)
 	binary.LittleEndian.PutUint16(topbys, pid)
 	binary.LittleEndian.PutUint16(topbys[2:], mid)
-	bufs := new(bytes.Buffer)
-	if err := binary.Write(bufs, binary.LittleEndian, msg); err != nil {
-		fmt.Println("err: ", err)
+	if msg != nil {
+		bufs := new(bytes.Buffer)
+		if err := binary.Write(bufs, binary.LittleEndian, msg); err != nil {
+			fmt.Println("err: ", err)
+		}
+		return [][]byte{topbys, bufs.Bytes()}, nil
 	}
-	return [][]byte{topbys, bufs.Bytes()}, nil
+	return [][]byte{topbys}, nil
 }
