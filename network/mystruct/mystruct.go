@@ -74,10 +74,10 @@ func (p *Processor) Unmarshal(data []byte) (interface{}, error) {
 }
 
 // goroutine safe
-func (p *Processor) Marshal(pid uint16, mid uint16, msg interface{}) ([][]byte, error) {
+func (p *Processor) Marshal(mid uint16, sid uint16, msg interface{}) ([][]byte, error) {
 	topbys := make([]byte, 4)
-	binary.LittleEndian.PutUint16(topbys, pid)
-	binary.LittleEndian.PutUint16(topbys[2:], mid)
+	binary.LittleEndian.PutUint16(topbys, mid)
+	binary.LittleEndian.PutUint16(topbys[2:], sid)
 	if msg != nil {
 		bufs := new(bytes.Buffer)
 		if err := binary.Write(bufs, binary.LittleEndian, msg); err != nil {

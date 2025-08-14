@@ -122,9 +122,9 @@ func (a *agent) OnClose() {
 	}
 }
 
-func (a *agent) WriteMsg(pid uint16, mid uint16, msg interface{}) {
+func (a *agent) WriteMsg(mid uint16, sid uint16, msg interface{}) {
 	if a.gate.Processor != nil {
-		data, err := a.gate.Processor.Marshal(pid, mid, msg)
+		data, err := a.gate.Processor.Marshal(mid, sid, msg)
 		if err != nil {
 			log.Error("marshal message %v error: %v", reflect.TypeOf(msg), err)
 			return
