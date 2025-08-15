@@ -84,6 +84,7 @@ func (p *Processor) Marshal(mid uint16, sid uint16, msg interface{}) ([][]byte, 
 			fmt.Println("err: ", err)
 		}
 		return [][]byte{topbys, bufs.Bytes()}, nil
+	} else {
+		return [][]byte{topbys}, nil
 	}
-	return [][]byte{topbys}, nil
 }

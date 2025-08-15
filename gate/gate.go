@@ -88,6 +88,7 @@ type agent struct {
 	conn     network.Conn
 	gate     *Gate
 	userData interface{}
+	ntimer   *time.Timer
 }
 
 func (a *agent) Run() {
@@ -133,6 +134,31 @@ func (a *agent) WriteMsg(mid uint16, sid uint16, msg interface{}) {
 		if err != nil {
 			log.Error("write message %v error: %v", reflect.TypeOf(msg), err)
 		}
+	}
+}
+
+func (a *agent) WriteBytes(msg [][]byte) {
+	if a.gate.Processor != nil {
+		err := a.conn.WriteMsg(msg...)
+		if err != nil {
+			log.Error("write message %v error: %v", reflect.TypeOf(msg), err)
+		}
+	}
+}
+
+func (a *agent) LoginCheck(count time.Duration) {
+	a.ntimer = time.AfterFunc(count, func() {
+		a.ntimer = nil
+		usedt := a.UserData()
+		if usedt == nil {
+			a.Close()
+		}
+	})
+}
+func (a *agent) CancelLoginCheck() {
+	if a.ntimer != nil {
+		a.ntimer.Stop()
+		a.ntimer = nil
 	}
 }
 
