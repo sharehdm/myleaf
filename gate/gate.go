@@ -137,7 +137,7 @@ func (a *agent) WriteMsg(mid uint16, sid uint16, msg interface{}) {
 	}
 }
 
-func (a *agent) WriteBytes(msg [][]byte) {
+func (a *agent) WriteBytes(msg ...[]byte) {
 	if a.gate.Processor != nil {
 		err := a.conn.WriteMsg(msg...)
 		if err != nil {

@@ -7,7 +7,7 @@ import (
 
 type Agent interface {
 	WriteMsg(pid uint16, mid uint16, msg interface{}) // 发送消息
-	WriteBytes(msg [][]byte)                          // 发送消息
+	WriteBytes(msg ...[]byte)                         // 发送消息
 	LocalAddr() net.Addr
 	RemoteAddr() net.Addr
 	Close()
