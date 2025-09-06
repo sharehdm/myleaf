@@ -56,8 +56,6 @@ Leaf source code directories
 * leaf/go : Factory of goroutine that manageable for Leaf
 * leaf/log : Logging
 * leaf/network : Networking through TCP or WebSocket with a customized message encoding. There are two built-in encodings, [protobuf](https://developers.google.com/protocol-buffers) and JSON.
-* leaf/recordfile : To manage game related data.
-* leaf/timer : Timer
 * leaf/util : Utilities
 
 How to use Leaf
@@ -350,7 +348,6 @@ skeleton is the key which implements `Run()` and provides:
 
 * ChanRPC
 * goroutine
-* Timer
 
 ### Leaf ChanRPC
 
@@ -479,48 +476,6 @@ LogFlag：[https://golang.org/pkg/log/#pkg-constants](https://golang.org/pkg/log
 
 More references are at [leaf/log](https://github.com/sharehdm/myleaf/blob/master/log).
 
-### Leaf recordfile
-
-Leaf recordfile is formatted in CSV([Example](https://github.com/sharehdm/myleaf/blob/master/recordfile/test.txt)). recordfile is to manage the configuration for game. The usage of recordfile in LeafServer is quite simple:
-
-1. Create a CSV file under bin/gamedata
-2. Call readRf() to read it in gamedata module
-
-Samples:
-
-```go
-// Make sure Test.txt is located in bin/gamedata
-// The file name must match the name of the struct, and all characters are case sensitive.
-// Every instance of defined struct maps to one specific row in recordfile
-type Test struct {
-    // The type of first column is int
-    // "index" means this column will be indexed(exclusively)
-    Id  int "index"
-    // The type of second column is an array of int with a length of 4
-    Arr [4]int
-    // The type of third column is string
-    Str string
-}
-
-// Load recordfile Test.txt into memory
-// RfTest is the object that represents Test.txt in memory
-var RfTest = readRf(Test{})
-
-func init() {
-    // Search in index
-    // Fetch the row with id equals 1 in Test.txt
-    r := RfTest.Index(1)
-
-    if r != nil {
-        row := r.(*Test)
-
-        // Log this row
-        log.Debug("%v %v %v", row.Id, row.Arr, row.Str)
-    }
-}
-```
-
-Refer to [leaf/recordfile](https://github.com/sharehdm/myleaf/blob/master/recordfile) for more details.
 
 Learn more
 ----------

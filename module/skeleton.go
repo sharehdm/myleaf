@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/sharehdm/myleaf/chanrpc"
-	"github.com/sharehdm/myleaf/console"
 	g "github.com/sharehdm/myleaf/go"
 	"github.com/sharehdm/myleaf/timer"
 )
@@ -115,8 +114,4 @@ func (s *Skeleton) RegisterChanRPC(id int, f interface{}) {
 	}
 
 	s.server.Register(id, f)
-}
-
-func (s *Skeleton) RegisterCommand(id int, help string, f interface{}) {
-	console.Register(id, help, f, s.commandServer)
 }

@@ -6,7 +6,7 @@ import (
 
 	"github.com/sharehdm/myleaf/cluster"
 	"github.com/sharehdm/myleaf/conf"
-	"github.com/sharehdm/myleaf/console"
+
 	"github.com/sharehdm/myleaf/log"
 	"github.com/sharehdm/myleaf/module"
 )
@@ -29,19 +29,13 @@ func Run(mods ...module.Module) {
 		module.Register(mods[i])
 	}
 	module.Init()
-
 	// cluster
 	cluster.Init()
-
-	// console
-	console.Init()
-
 	// close
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, os.Kill)
 	sig := <-c
 	log.Release("Leaf closing down (signal: %v)", sig)
-	console.Destroy()
 	cluster.Destroy()
 	module.Destroy()
 }

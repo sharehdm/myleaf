@@ -46,12 +46,10 @@ Leaf 源码概览
 ---------------
 
 * leaf/chanrpc 提供了一套基于 channel 的 RPC 机制，用于游戏服务器模块间通讯
-* leaf/db 数据库相关，目前支持 [MongoDB](https://www.mongodb.org/)
 * leaf/gate 网关模块，负责游戏客户端的接入
 * leaf/go 用于创建能够被 Leaf 管理的 goroutine
 * leaf/log 日志相关
 * leaf/network 网络相关，使用 TCP 和 WebSocket 协议，可自定义消息格式，默认 Leaf 提供了基于 [protobuf](https://developers.google.com/protocol-buffers) 和 JSON 的消息格式
-* leaf/recordfile 用于管理游戏数据
 * leaf/timer 定时器相关
 * leaf/util 辅助库
 
@@ -473,49 +471,6 @@ LogFlag = log.Lshortfile
 
 
 更加详细的用法可以参考 [leaf/log](https://github.com/sharehdm/myleaf/blob/master/log)。
-
-### Leaf recordfile
-
-Leaf 的 recordfile 是基于 CSV 格式（范例见[这里](https://github.com/sharehdm/myleaf/blob/master/recordfile/test.txt)）。recordfile 用于管理游戏配置数据。在 LeafServer 中使用 recordfile 非常简单：
-
-1. 将 CSV 文件放置于 bin/gamedata 目录中
-2. 在 gamedata 模块中调用函数 readRf 读取 CSV 文件
-
-范例：
-
-```go
-// 确保 bin/gamedata 目录中存在 Test.txt 文件
-// 文件名必须和此结构体名称相同（大小写敏感）
-// 结构体的一个实例映射 recordfile 中的一行
-type Test struct {
-	// 将第一列按 int 类型解析
-	// "index" 表明在此列上建立唯一索引
-	Id  int "index"
-	// 将第二列解析为长度为 4 的整型数组
-	Arr [4]int
-	// 将第三列解析为字符串
-	Str string
-}
-
-// 读取 recordfile Test.txt 到内存中
-// RfTest 即为 Test.txt 的内存镜像
-var RfTest = readRf(Test{})
-
-func init() {
-	// 按索引查找
-	// 获取 Test.txt 中 Id 为 1 的那一行
-	r := RfTest.Index(1)
-
-	if r != nil {
-		row := r.(*Test)
-
-		// 输出此行的所有列的数据
-		log.Debug("%v %v %v", row.Id, row.Arr, row.Str)
-	}
-}
-```
-
-更加详细的用法可以参考 [leaf/recordfile](https://github.com/sharehdm/myleaf/blob/master/recordfile)。
 
 了解更多
 ---------------
