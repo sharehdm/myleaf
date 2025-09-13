@@ -63,6 +63,20 @@ func (p *Processor) Route(msg interface{}, userData interface{}) error {
 	return nil
 }
 
+func (p *Processor) SendMsg(msgtype int, sid uint16, userData interface{}) (err error) {
+	i, ok := p.msgInfo[int(msgtype)]
+	if !ok {
+		return fmt.Errorf("message %v not registered", msgtype)
+	}
+	if i.msgRouter != nil {
+		topbys := make([]byte, 4)
+		binary.LittleEndian.PutUint16(topbys, uint16(msgtype))
+		binary.LittleEndian.PutUint16(topbys[2:], sid)
+		i.msgRouter.Go(msgtype, topbys, userData)
+	}
+	return nil
+}
+
 // goroutine safe
 func (p *Processor) Unmarshal(data []byte) (interface{}, error) {
 	msgtype := (int)(binary.LittleEndian.Uint16(data))
