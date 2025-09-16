@@ -2,11 +2,11 @@ package mystruct
 
 import (
 	"bytes"
-	"encoding/binary"
 	"fmt"
 
 	"github.com/sharehdm/myleaf/chanrpc"
 	"github.com/sharehdm/myleaf/log"
+	"github.com/sharehdm/myleaf/util/binary"
 )
 
 type Processor struct {
