@@ -94,7 +94,7 @@ func (p *Processor) Marshal(mid uint16, sid uint16, msg interface{}) ([][]byte, 
 	binary.LittleEndian.PutUint16(topbys[2:], sid)
 	if msg != nil {
 		bufs := new(bytes.Buffer)
-		if err := binary.Write(bufs, binary.LittleEndian, msg); err != nil {
+		if err := binary.WriteStruct(bufs, binary.LittleEndian, msg); err != nil {
 			fmt.Println("err: ", err)
 		}
 		return [][]byte{topbys, bufs.Bytes()}, nil
