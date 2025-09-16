@@ -414,17 +414,99 @@ func Write(w io.Writer, order ByteOrder, data any) error {
 			bs = make([]byte, n)
 			encodeFast(bs, order, data)
 		}
-
 		_, err := w.Write(bs)
 		return err
 	}
 
 	v := reflect.ValueOf(data)
 	for i := 0; i < v.NumField(); i++ {
-		err2 := Write(w, order, v.Field(i))
+		err2 := Write2(w, order, v.Field(i))
 		if err2 != nil {
 			return err2
 		}
+	}
+	return nil
+}
+
+func WriteStruct(w io.Writer, order ByteOrder, data any) error {
+	v := reflect.ValueOf(data)
+	// 如果是指针，获取其指向的值
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	for i := 0; i < v.NumField(); i++ {
+		err2 := Write2(w, order, v.Field(i))
+		if err2 != nil {
+			return err2
+		}
+	}
+	return nil
+}
+
+func Write2(w io.Writer, order ByteOrder, datava reflect.Value) error {
+	if datava.Kind() == reflect.Ptr {
+		datava = datava.Elem()
+	}
+	switch datava.Kind() {
+	case reflect.Struct:
+		for i := 0; i < datava.NumField(); i++ {
+			Write2(w, order, datava.Field(i))
+		}
+	case reflect.Array, reflect.Slice:
+		l := datava.Len()
+		for i := 0; i < l; i++ {
+			Write2(w, order, datava.Index(i))
+		}
+	case reflect.Bool:
+		var bs [1]byte
+		if datava.Bool() {
+			bs[0] = 1
+		} else {
+			bs[0] = 0
+		}
+		w.Write(bs[:])
+	case reflect.Int8:
+		var bs [1]byte
+		bs[0] = byte(datava.Int())
+		w.Write(bs[:])
+	case reflect.Uint8:
+		var bs [1]byte
+		bs[0] = byte(datava.Uint())
+		w.Write(bs[:])
+	case reflect.Int16:
+		var bs [2]byte
+		order.PutUint16(bs[:], uint16(datava.Int()))
+		w.Write(bs[:])
+	case reflect.Uint16:
+		var bs [2]byte
+		order.PutUint16(bs[:], uint16(datava.Uint()))
+		w.Write(bs[:])
+	case reflect.Int32:
+		var bs [4]byte
+		order.PutUint32(bs[:], uint32(datava.Int()))
+		w.Write(bs[:])
+	case reflect.Uint32:
+		var bs [4]byte
+		order.PutUint32(bs[:], uint32(datava.Uint()))
+		w.Write(bs[:])
+	case reflect.Int64:
+		var bs [8]byte
+		order.PutUint64(bs[:], uint64(datava.Int()))
+		w.Write(bs[:])
+	case reflect.Uint64:
+		var bs [8]byte
+		order.PutUint64(bs[:], uint64(datava.Uint()))
+		w.Write(bs[:])
+	case reflect.Float32:
+		var bs [4]byte
+		order.PutUint32(bs[:], math.Float32bits(float32(datava.Float())))
+		w.Write(bs[:])
+	case reflect.Float64:
+		var bs [8]byte
+		order.PutUint64(bs[:], math.Float64bits(datava.Float()))
+		w.Write(bs[:])
+	default:
+		return errors.New("binary.Write: invalid type")
 	}
 	return nil
 }
