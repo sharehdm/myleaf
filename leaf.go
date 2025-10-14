@@ -5,23 +5,12 @@ import (
 	"os/signal"
 
 	"github.com/sharehdm/myleaf/cluster"
-	"github.com/sharehdm/myleaf/conf"
 
 	"github.com/sharehdm/myleaf/log"
 	"github.com/sharehdm/myleaf/module"
 )
 
 func Run(mods ...module.Module) {
-	// logger
-	if conf.LogLevel != "" {
-		logger, err := log.New(conf.LogLevel, conf.LogPath, conf.LogFlag)
-		if err != nil {
-			panic(err)
-		}
-		log.Export(logger)
-		defer logger.Close()
-	}
-
 	log.Release("Leaf %v starting up", version)
 
 	// module
